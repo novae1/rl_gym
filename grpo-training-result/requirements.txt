@@ -1,0 +1,9 @@
+unsloth
+vllm==0.10.2
+torchvision
+bitsandbytes
+xformers
+triton
+transformers==4.56.2
+trl==0.22.2
+datasets
