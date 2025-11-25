@@ -2,13 +2,13 @@
 GRPO Training Script for Gemma 3 (1B) on GSM8K
 
 Usage on RunPod:
-    # In a persistent session (screen):
-    screen -S training
+    # In a persistent session (tmux):
+    tmux new -s training
     python train.py 2>&1 | tee training.log
-    # Press Ctrl+A then D to detach
+    # Press Ctrl+B then D to detach
 
     # To reattach later:
-    screen -r training
+    tmux attach -t training
 
     # To monitor the log:
     tail -f training.log
@@ -69,12 +69,12 @@ training_args = GRPOConfig(
     lr_scheduler_type = "cosine",
     optim = "adamw_torch_fused",
     logging_steps = 1,
-    per_device_train_batch_size = 32,
+    per_device_train_batch_size = 48,
     gradient_accumulation_steps = 1, # Increase to 4 for smoother training
     num_generations = 8, # Decrease if out of memory
     max_prompt_length = max_prompt_length,
     max_completion_length = max_seq_length - max_prompt_length,
-    num_train_epochs = 2, # Set to 1 for a full training run
+    num_train_epochs = 1, # Set to 1 for a full training run
     save_steps = 50,
     max_grad_norm = 0.1,
     report_to = "none", # Can use Weights & Biases
