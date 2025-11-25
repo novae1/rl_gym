@@ -26,6 +26,11 @@ match_numbers = re.compile(
     flags = re.MULTILINE | re.DOTALL
 )
 
+match_boxed = re.compile(
+    r'\$\\boxed\{([^}]+)\}\$',  # Matches $\boxed{...}$
+    flags = re.MULTILINE | re.DOTALL
+)
+
 # Data preprocessing functions
 def extract_hash_answer(text):
     if "####" not in text: return None
@@ -112,11 +117,17 @@ def check_numbers(prompts, completions, answer, **kwargs):
     question = prompts[0][-1]["content"]
     responses = [completion[0]["content"] for completion in completions]
 
-    extracted_responses = [
-        guess.group(1)
-        if (guess := match_numbers.search(r)) is not None else None \
-        for r in responses
-    ]
+    extracted_responses = []
+    for r in responses:
+        # Try to extract from boxed pattern first (take LAST occurrence)
+        boxed_matches = match_boxed.findall(r)
+        if boxed_matches:
+            extracted_responses.append(boxed_matches[-1])  # Last match = final answer
+            continue
+
+        # Fall back to SOLUTION pattern
+        guess = match_numbers.search(r)
+        extracted_responses.append(guess.group(1) if guess is not None else None)
 
     scores = []
     print('*'*20, f"Question:\n{question}", f"\nAnswer:\n{answer[0]}", f"\nResponse:\n{responses[0]}", f"\nExtracted:\n{extracted_responses[0]}")
